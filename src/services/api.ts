@@ -1,5 +1,3 @@
-import axios from 'axios';
-
 // Get API URL from ENV, or leave empty to use local mock mode
 const API_URL = import.meta.env.VITE_GAS_API_URL || '';
 
@@ -38,9 +36,9 @@ let mockSurat: Surat[] = [
 // --- API FUNCTIONS ---
 export const getWarga = async (): Promise<Warga[]> => {
   if (!API_URL) return [...mockWarga];
-  const res = await axios.get(`${API_URL}?action=getWarga`);
+  const response = await fetch(`${API_URL}?action=getWarga`);
+  const data = await response.json();
   // Handle array of arrays from GAS (remove header line if present)
-  const data = res.data;
   if (Array.isArray(data) && data.length > 0 && data[0][0] === 'nik') {
     data.shift(); 
   }
@@ -52,8 +50,8 @@ export const getWarga = async (): Promise<Warga[]> => {
 
 export const getSurat = async (): Promise<Surat[]> => {
   if (!API_URL) return [...mockSurat];
-  const res = await axios.get(`${API_URL}?action=getSurat`);
-  const data = res.data;
+  const response = await fetch(`${API_URL}?action=getSurat`);
+  const data = await response.json();
   if (Array.isArray(data) && data.length > 0 && data[0][0] === 'id') {
     data.shift();
   }
@@ -68,11 +66,17 @@ export const addWarga = async (data: Warga) => {
     mockWarga.push({ ...data });
     return { success: true };
   }
-  const res = await axios.post(API_URL, {
-    action: 'addWarga',
-    ...data,
+  const response = await fetch(API_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "text/plain;charset=utf-8",
+    },
+    body: JSON.stringify({
+      action: 'addWarga',
+      ...data,
+    }),
   });
-  return res.data;
+  return await response.json();
 };
 
 export const addSurat = async (data: Surat) => {
@@ -80,9 +84,15 @@ export const addSurat = async (data: Surat) => {
     mockSurat.push({ ...data, id: Date.now().toString(), tanggal: new Date().toISOString(), status: 'Pending' });
     return { success: true };
   }
-  const res = await axios.post(API_URL, {
-    action: 'addSurat',
-    ...data,
+  const response = await fetch(API_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "text/plain;charset=utf-8",
+    },
+    body: JSON.stringify({
+      action: 'addSurat',
+      ...data,
+    }),
   });
-  return res.data;
+  return await response.json();
 };

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import { addWarga } from '../services/api';
 
 export default function WargaData() {
@@ -16,19 +16,26 @@ export default function WargaData() {
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setSuccessMsg('');
     
     try {
-      await addWarga(form);
-      setSuccessMsg('Data berhasil disimpan!');
-      setForm({
-        nik: '', nama: '', alamat: '', rt: '', rw: '', pekerjaan: '', status: '', no_hp: ''
-      });
-    } catch (err) {
-      alert('Gagal menyimpan data.');
+      const result = await addWarga(form);
+      console.log(result);
+      if (result.success) {
+        setSuccessMsg('Data berhasil disimpan!');
+        // alert("Data berhasil disimpan!"); // Can also use alert instead of or along with successMsg
+        setForm({
+          nik: '', nama: '', alamat: '', rt: '', rw: '', pekerjaan: '', status: '', no_hp: ''
+        });
+      } else {
+        alert(result.error || "Gagal menyimpan");
+      }
+    } catch (err: any) {
+      console.error(err);
+      alert("ERROR: " + err.message);
     } finally {
       setLoading(false);
     }

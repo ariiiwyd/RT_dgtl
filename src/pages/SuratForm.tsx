@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import { addSurat } from '../services/api';
 
 export default function SuratForm() {
@@ -23,17 +23,23 @@ export default function SuratForm() {
     'Surat Kelahiran'
   ];
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setSuccessMsg('');
     
     try {
-      await addSurat(form);
-      setSuccessMsg('Pengajuan surat berhasil dikirim! Admin RT akan segera memprosesnya.');
-      setForm({ nik: '', nama: '', jenis_surat: '', keperluan: '' });
-    } catch (err) {
-      alert('Gagal mengajukan surat.');
+      const result = await addSurat(form);
+      console.log(result);
+      if (result.success) {
+        setSuccessMsg('Pengajuan surat berhasil dikirim! Admin RT akan segera memprosesnya.');
+        setForm({ nik: '', nama: '', jenis_surat: '', keperluan: '' });
+      } else {
+        alert(result.error || "Gagal mengajukan surat");
+      }
+    } catch (err: any) {
+      console.error(err);
+      alert("ERROR: " + err.message);
     } finally {
       setLoading(false);
     }
