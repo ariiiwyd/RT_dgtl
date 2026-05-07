@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { getWarga, Warga } from '../../services/api';
-import { Search } from 'lucide-react';
+import { getWarga, Warga, deleteWarga } from '../../services/api';
+import { Search, Trash2 } from 'lucide-react';
 
 export default function AdminWarga() {
   const [warga, setWarga] = useState<Warga[]>([]);
@@ -12,6 +12,23 @@ export default function AdminWarga() {
       setWarga(data);
     }).catch(console.error).finally(() => setLoading(false));
   }, []);
+
+  const handleDelete = async (nik: string, nama: string) => {
+    if (confirm(`Apakah Anda yakin ingin menghapus data warga bernama ${nama}?`)) {
+      try {
+        const result = await deleteWarga(nik);
+        if (result.success) {
+          setWarga(prev => prev.filter(w => w.nik !== nik));
+          alert("Data warga berhasil dihapus.");
+        } else {
+          alert(result.error || "Gagal menghapus data warga.");
+        }
+      } catch (err: any) {
+        console.error(err);
+        alert("ERROR: " + err.message);
+      }
+    }
+  };
 
   const filteredWarga = warga.filter(w => 
     w.nama.toLowerCase().includes(search.toLowerCase()) || 
@@ -51,6 +68,7 @@ export default function AdminWarga() {
                   <th className="pb-4 font-bold px-2">Alamat & Blok</th>
                   <th className="pb-4 font-bold px-2">Pekerjaan</th>
                   <th className="pb-4 font-bold px-2">No. HP</th>
+                  <th className="pb-4 font-bold px-2 text-right">Aksi</th>
                 </tr>
               </thead>
               <tbody>
@@ -66,11 +84,20 @@ export default function AdminWarga() {
                        <span className="px-2 py-1 bg-white/5 text-white/60 text-[10px] rounded">{w.pekerjaan?.slice(0, 20)}</span>
                     </td>
                     <td className="py-4 px-2 text-emerald-400/80 font-mono text-xs">{w.no_hp}</td>
+                    <td className="py-4 px-2 text-right">
+                      <button 
+                        onClick={() => handleDelete(w.nik, w.nama)}
+                        className="px-3 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg transition-colors border border-red-500/20"
+                        title="Hapus Warga"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </td>
                   </tr>
                 ))}
                 {filteredWarga.length === 0 && (
                   <tr>
-                    <td colSpan={5} className="px-6 py-12 text-center text-white/40">
+                    <td colSpan={6} className="px-6 py-12 text-center text-white/40">
                       Tidak ada data warga ditemukan.
                     </td>
                   </tr>

@@ -79,6 +79,24 @@ export const addWarga = async (data: Warga) => {
   return await response.json();
 };
 
+export const deleteWarga = async (nik: string) => {
+  if (!API_URL) {
+    mockWarga = mockWarga.filter(w => w.nik !== nik);
+    return { success: true };
+  }
+  const response = await fetch(API_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "text/plain;charset=utf-8",
+    },
+    body: JSON.stringify({
+      action: 'deleteWarga',
+      nik: nik,
+    }),
+  });
+  return await response.json();
+};
+
 export const addSurat = async (data: Surat) => {
   if (!API_URL) {
     mockSurat.push({ ...data, id: Date.now().toString(), tanggal: new Date().toISOString(), status: 'Pending' });
@@ -96,3 +114,4 @@ export const addSurat = async (data: Surat) => {
   });
   return await response.json();
 };
+
